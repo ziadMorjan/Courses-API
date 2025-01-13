@@ -1,110 +1,112 @@
-const fs = require("fs");
+const Course = require("./../models/Course");
 
-let courses = JSON.parse(fs.readFileSync("./data/courses.json", "utf-8"));
-
-function getAllCourses(req, res) {
-    res.status(200).json({
-        stauts: "sucess",
-        data: {
-            courses
-        }
-    });
-}
-
-function checkBody(req, res, next) {
-    if (!req.body.title || !req.body.price) {
-        return res.status(400).json({
+async function getAllCourses(req, res) {
+    try {
+        let courses = await Course.find();
+        res.status(200).json({
+            status: "success",
+            length: courses.length,
+            data: {
+                courses
+            }
+        });
+    } catch (error) {
+        res.status(404).json({
             status: "fail",
-            message: "Title and price is require."
+            message: error.message,
+            data: null
         });
     }
-    next();
 }
 
-function createCourse(req, res) {
-    let newCourse = {
-        id: courses.length + 1,
-        ...req.body
-    };
-
-    courses.push(newCourse);
-
-    fs.writeFile("./data/courses.json", JSON.stringify(courses), (err) => {
-        if (err) {
-            console.log(err);
-        }
+async function createCourse(req, res) {
+    try {
+        let course = await Course.create(req.body);
         res.status(201).json({
-            stauts: "sucess",
-            data: {
-                newCourse
-            }
-        });
-    });
-
-}
-
-function checkId(req, res, next, value) {
-    let course = courses.find((ele) => ele.id === +value);
-
-    if (!course) {
-        return res.status(404).json({
-            stauts: "fail",
-            message: `The course with id ${value} is not found`,
-            data: {
-                course: null
-            }
-        });
-    }
-    next();
-}
-
-function getSingleCourse(req, res) {
-    let course = courses.find((ele) => ele.id === +req.params.id);
-
-    res.status(200).json({
-        stauts: "sucess",
-        data: {
-            course
-        }
-    });
-}
-
-function updateCourse(req, res) {
-    let course = courses.find((ele) => ele.id === +req.params.id);
-    course = {
-        ...course,
-        ...req.body
-    };
-
-    fs.writeFile("./data/courses.json", JSON.stringify(courses), (err) => {
-        if (err) {
-            console.log(err);
-        }
-        res.status(201).json({
-            stauts: "sucess",
+            status: "success",
             data: {
                 course
             }
         });
-    });
+    } catch (error) {
+        res.status(400).json({
+            status: "fail",
+            message: error.message,
+            data: null
+        });
+    }
 }
 
-function deleteCourse(req, res) {
-    let course = courses.find((ele) => ele.id === +req.params.id);
-
-    courses = courses.filter((ele) => ele.id !== course.id);
-
-    fs.writeFile("./data/courses.json", JSON.stringify(courses), (err) => {
-        if (err) {
-            console.log(err);
+async function checkId(req, res, next, value) {
+    try {
+        let course = await Course.findById(value);
+        if (!course) {
+            return res.status(404).json({
+                status: "fail",
+                message: `The course with id '${value}' is not found`
+            });
         }
-        res.status(203).json({
-            stauts: "sucess",
+    } catch (error) {
+        console.log(error.message);
+    }
+    next();
+}
+
+async function getSingleCourse(req, res) {
+    try {
+        let course = await Course.findById(req.params.id);
+        res.status(200).json({
+            status: "success",
             data: {
-                course: null
+                course
             }
         });
-    });
+    } catch (error) {
+        res.status(404).json({
+            status: "fail",
+            message: error.message,
+            data: null
+        });
+    }
+}
+
+async function updateCourse(req, res) {
+    try {
+        let updatedCourse = await Course.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+            runValidator: true
+        });
+        res.status(200).json({
+            status: "success",
+            data: {
+                updatedCourse
+            }
+        });
+    } catch (error) {
+        res.status(404).json({
+            status: "fail",
+            message: error.message,
+            data: null
+        });
+    }
+}
+
+async function deleteCourse(req, res) {
+    try {
+        let updatedCourse = await Course.findByIdAndDelete(req.params.id);
+        res.status(204).json({
+            status: "success",
+            data: {
+                updatedCourse
+            }
+        });
+    } catch (error) {
+        res.status(404).json({
+            status: "fail",
+            message: error.message,
+            data: null
+        });
+    }
 }
 
 module.exports = {
@@ -113,6 +115,5 @@ module.exports = {
     createCourse,
     updateCourse,
     deleteCourse,
-    checkId,
-    checkBody
+    checkId
 };

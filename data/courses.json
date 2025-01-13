@@ -1,1 +1,42 @@
-[{"id":1,"title":"Course 1","price":100},{"id":2,"title":"Course 2","price":150},{"id":3,"title":"Course 3","price":200},{"id":4,"title":"new Course","price":300}]
+[
+    {
+        "title": "HTML Course",
+        "price": 100
+    },
+    {
+        "title": "CSS Course",
+        "price": 150
+    },
+    {
+        "title": "JS Course",
+        "price": 200
+    },
+    {
+        "title": "ReactJS course",
+        "price": 300
+    },
+    {
+        "title": "NodetJS course",
+        "price": 300
+    },
+    {
+        "title": "Java course",
+        "price": 250
+    },
+    {
+        "title": "Python course",
+        "price": 250
+    },
+    {
+        "title": "OPP course",
+        "price": 180
+    },
+    {
+        "title": "Data Structures course",
+        "price": 180
+    },
+    {
+        "title": "Algorithms course",
+        "price": 180
+    }
+]
