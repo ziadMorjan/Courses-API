@@ -1,8 +1,15 @@
 const Course = require("./../models/Course");
+const QueryManipulater = require("../utils/QueryManipulater");
 
 async function getAllCourses(req, res) {
     try {
-        let courses = await Course.find();
+        let qm = new QueryManipulater(Course, req)
+            .filter()
+            .sort()
+            .limitFields()
+            .paginate();
+        let courses = await qm.query;
+
         res.status(200).json({
             status: "success",
             length: courses.length,
