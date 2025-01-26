@@ -1,13 +1,14 @@
 const dotenv = require("dotenv");
 dotenv.config({ path: "./config.env" });
 const app = require("./app");
-const connectToDb = require("./config/connectToDb");
+const db = require("./config/db");
 
 let port = 5000,
     hostname = "localhost";
 
 app.listen(port, hostname, () => {
-    console.log(`Server started on http://${hostname}:${port}`);
+    console.log(`Mode => ${process.env.NODE_ENV}`);
+    console.log(`Server started on => http://${hostname}:${port}`);
 });
 
-connectToDb(process.env.CONN_STR);
+db.connect(process.env.CONN_STR);

@@ -1,10 +1,10 @@
 const dotenv = require("dotenv");
-dotenv.config({ path: "./../config.env" });
+dotenv.config({ path: "./../../config.env" });
 const fs = require("fs");
-const connectToDb = require("./../config/connectToDb");
-const Course = require("./../models/Course");
+const db = require("./../../config/db");
+const Course = require("./../../models/Course");
 
-connectToDb(process.env.CONN_STR);
+db.connect(process.env.CONN_STR);
 
 let courses = JSON.parse(fs.readFileSync("./courses.json", "utf-8"));
 
@@ -27,9 +27,9 @@ async function importDoc() {
     process.exit();
 }
 
-if (process.argv[2] == "--delete") {
+if (process.argv[2] == "-d") {
     deleteDoc();
 }
-if (process.argv[2] == "--import") {
+if (process.argv[2] == "-i") {
     importDoc();
 }

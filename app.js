@@ -4,7 +4,7 @@ const courseRouter = require("./routes/courseRouter");
 
 let app = express();
 
-//midllelwares
+// middlewares
 app.use(express.json());
 app.use(morgan("dev"));
 
