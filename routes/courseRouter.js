@@ -5,6 +5,9 @@ let router = express.Router();
 
 router.param("id", courseController.checkId);
 
+router.route("/coursesStats")
+    .get(courseController.getCoursesStats);
+
 router.route("/")
     .get(courseController.getAllCourses)
     .post(courseController.createCourse);

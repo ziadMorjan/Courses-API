@@ -100,11 +100,40 @@ async function updateCourse(req, res) {
 
 async function deleteCourse(req, res) {
     try {
-        let updatedCourse = await Course.findByIdAndDelete(req.params.id);
+        await Course.findByIdAndDelete(req.params.id);
         res.status(204).json({
             status: "success",
+            data: null
+        });
+    } catch (error) {
+        res.status(404).json({
+            status: "fail",
+            message: error.message,
+            data: null
+        });
+    }
+}
+
+async function getCoursesStats(req, res) {
+    try {
+        let stats = await Course.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalPrice: { $sum: '$price' },
+                    minPrice: { $min: '$price' },
+                    maxPrice: { $max: '$price' },
+                    avgPrice: { $avg: '$price' },
+                }
+            },
+            {
+                $project: { '_id': 0 }
+            }
+        ]);
+        res.status(200).json({
+            status: "success",
             data: {
-                updatedCourse
+                stats
             }
         });
     } catch (error) {
@@ -122,5 +151,6 @@ module.exports = {
     createCourse,
     updateCourse,
     deleteCourse,
-    checkId
+    checkId,
+    getCoursesStats
 };
