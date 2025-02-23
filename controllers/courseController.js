@@ -1,5 +1,5 @@
 const Course = require("./../models/Course");
-const QueryManipulater = require("../utils/QueryManipulater");
+const QueryManipulater = require("./../utils/QueryManipulater");
 
 async function getAllCourses(req, res) {
     try {
@@ -12,7 +12,7 @@ async function getAllCourses(req, res) {
 
         res.status(200).json({
             status: "success",
-            length: courses.length,
+            count: courses.length,
             data: {
                 courses
             }
@@ -50,7 +50,7 @@ async function checkId(req, res, next, value) {
         if (!course) {
             return res.status(404).json({
                 status: "fail",
-                message: `The course with id '${value}' is not found`
+                message: `The course with id "${value}" is not found`
             });
         }
     } catch (error) {
@@ -119,15 +119,22 @@ async function getCoursesStats(req, res) {
         let stats = await Course.aggregate([
             {
                 $group: {
-                    _id: null,
-                    totalPrice: { $sum: '$price' },
-                    minPrice: { $min: '$price' },
-                    maxPrice: { $max: '$price' },
-                    avgPrice: { $avg: '$price' },
+                    _id: "$releaseYear",
+                    count: { $sum: 1 },
+                    totalPrice: { $sum: "$price" },
+                    minPrice: { $min: "$price" },
+                    maxPrice: { $max: "$price" },
+                    avgPrice: { $avg: "$price" },
                 }
             },
             {
-                $project: { '_id': 0 }
+                $addFields: { "releaseYear": "$_id" }
+            },
+            {
+                $project: { "_id": 0 }
+            },
+            {
+                $sort: { "releaseYear": 1 }
             }
         ]);
         res.status(200).json({

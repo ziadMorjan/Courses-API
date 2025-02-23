@@ -1,42 +1,52 @@
 [
     {
         "title": "HTML Course",
-        "price": 100
+        "price": 100,
+        "releaseYear": 2021
     },
     {
         "title": "CSS Course",
-        "price": 150
+        "price": 150,
+        "releaseYear": 2022
     },
     {
         "title": "JS Course",
-        "price": 200
+        "price": 200,
+        "releaseYear": 2023
     },
     {
         "title": "ReactJS course",
-        "price": 300
+        "price": 300,
+        "releaseYear": 2024
     },
     {
         "title": "NodeJS course",
-        "price": 300
+        "price": 300,
+        "releaseYear": 2022
     },
     {
         "title": "Java course",
-        "price": 250
+        "price": 250,
+        "releaseYear": 2023
     },
     {
         "title": "Python course",
-        "price": 250
+        "price": 250,
+        "releaseYear": 2024
     },
     {
         "title": "OPP course",
-        "price": 180
+        "price": 180,
+        "releaseYear": 2025
     },
     {
         "title": "Data Structures course",
-        "price": 180
+        "price": 180,
+        "releaseYear": 2026
     },
     {
         "title": "Algorithms course",
-        "price": 180
+        "price": 180,
+        "releaseYear": 2026
     }
 ]
