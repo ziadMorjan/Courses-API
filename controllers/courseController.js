@@ -1,156 +1,104 @@
 const Course = require("./../models/Course");
 const QueryManipulater = require("./../utils/QueryManipulater");
+const { asyncErrorHandler } = require("./ErrorController");
+const CustomError = require("./../utils/CustomError");
 
-async function getAllCourses(req, res) {
-    try {
-        let qm = new QueryManipulater(Course, req)
-            .filter()
-            .sort()
-            .limitFields()
-            .paginate();
-        let courses = await qm.query;
+let getAllCourses = asyncErrorHandler(async function (req, res) {
+    let qm = new QueryManipulater(Course, req)
+        .filter()
+        .sort()
+        .limitFields()
+        .paginate();
+    let courses = await qm.query;
 
-        res.status(200).json({
-            status: "success",
-            count: courses.length,
-            data: {
-                courses
-            }
-        });
-    } catch (error) {
-        res.status(404).json({
-            status: "fail",
-            message: error.message,
-            data: null
-        });
-    }
-}
-
-async function createCourse(req, res) {
-    try {
-        let course = await Course.create(req.body);
-        res.status(201).json({
-            status: "success",
-            data: {
-                course
-            }
-        });
-    } catch (error) {
-        res.status(400).json({
-            status: "fail",
-            message: error.message,
-            data: null
-        });
-    }
-}
-
-async function checkId(req, res, next, value) {
-    try {
-        let course = await Course.findById(value);
-        if (!course) {
-            return res.status(404).json({
-                status: "fail",
-                message: `The course with id "${value}" is not found`
-            });
+    res.status(200).json({
+        status: "success",
+        count: courses.length,
+        data: {
+            courses
         }
-    } catch (error) {
-        console.log(error.message);
-    }
-    next();
-}
+    });
+});
 
-async function getSingleCourse(req, res) {
-    try {
-        let course = await Course.findById(req.params.id);
-        res.status(200).json({
-            status: "success",
-            data: {
-                course
-            }
-        });
-    } catch (error) {
-        res.status(404).json({
-            status: "fail",
-            message: error.message,
-            data: null
-        });
-    }
-}
+let createCourse = asyncErrorHandler(async function (req, res) {
+    let course = await Course.create(req.body);
+    res.status(201).json({
+        status: "success",
+        data: {
+            course
+        }
+    });
+});
 
-async function updateCourse(req, res) {
-    try {
-        let updatedCourse = await Course.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidator: true
-        });
-        res.status(200).json({
-            status: "success",
-            data: {
-                updatedCourse
-            }
-        });
-    } catch (error) {
-        res.status(404).json({
-            status: "fail",
-            message: error.message,
-            data: null
-        });
+let getSingleCourse = asyncErrorHandler(async function (req, res) {
+    let course = await Course.findById(req.params.id);
+    if (!course) {
+        throw new CustomError(`There is no course found with Id '${req.params.id}'`, 404);
     }
-}
+    res.status(200).json({
+        status: "success",
+        data: {
+            course
+        }
+    });
+});
 
-async function deleteCourse(req, res) {
-    try {
-        await Course.findByIdAndDelete(req.params.id);
-        res.status(204).json({
-            status: "success",
-            data: null
-        });
-    } catch (error) {
-        res.status(404).json({
-            status: "fail",
-            message: error.message,
-            data: null
-        });
+let updateCourse = asyncErrorHandler(async function (req, res) {
+    let updatedCourse = await Course.findByIdAndUpdate(req.params.id, req.body, {
+        new: true,
+        runValidator: true
+    });
+    if (!updatedCourse) {
+        throw new CustomError(`There is no course found with Id '${req.params.id}'`, 404);
     }
-}
+    res.status(200).json({
+        status: "success",
+        data: {
+            updatedCourse
+        }
+    });
+});
 
-async function getCoursesStats(req, res) {
-    try {
-        let stats = await Course.aggregate([
-            {
-                $group: {
-                    _id: "$releaseYear",
-                    count: { $sum: 1 },
-                    totalPrice: { $sum: "$price" },
-                    minPrice: { $min: "$price" },
-                    maxPrice: { $max: "$price" },
-                    avgPrice: { $avg: "$price" },
-                }
-            },
-            {
-                $addFields: { "releaseYear": "$_id" }
-            },
-            {
-                $project: { "_id": 0 }
-            },
-            {
-                $sort: { "releaseYear": 1 }
-            }
-        ]);
-        res.status(200).json({
-            status: "success",
-            data: {
-                stats
-            }
-        });
-    } catch (error) {
-        res.status(404).json({
-            status: "fail",
-            message: error.message,
-            data: null
-        });
+let deleteCourse = asyncErrorHandler(async function (req, res) {
+    let deletedCourse = await Course.findByIdAndDelete(req.params.id);
+    if (!deletedCourse) {
+        throw new CustomError(`There is no course found with Id ${req.params.id}`, 404);
     }
-}
+    res.status(204).json({
+        status: "success",
+        data: null
+    });
+});
+
+let getCoursesStats = asyncErrorHandler(async function (req, res) {
+    let stats = await Course.aggregate([
+        {
+            $group: {
+                _id: "$releaseYear",
+                count: { $sum: 1 },
+                totalPrice: { $sum: "$price" },
+                minPrice: { $min: "$price" },
+                maxPrice: { $max: "$price" },
+                avgPrice: { $avg: "$price" },
+            }
+        },
+        {
+            $addFields: { "releaseYear": "$_id" }
+        },
+        {
+            $project: { "_id": 0 }
+        },
+        {
+            $sort: { "releaseYear": 1 }
+        }
+    ]);
+    res.status(200).json({
+        status: "success",
+        data: {
+            stats
+        }
+    });
+});
 
 module.exports = {
     getAllCourses,
@@ -158,6 +106,5 @@ module.exports = {
     createCourse,
     updateCourse,
     deleteCourse,
-    checkId,
     getCoursesStats
 };

@@ -25,7 +25,6 @@ class QueryManipulater {
     }
 
     sort() {
-        console.log(this.req.query);
 
         if (this.req.query.sort) {
             let sortBy = this.req.query.sort.split(",").join(" ");
