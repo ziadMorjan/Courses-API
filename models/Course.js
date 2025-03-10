@@ -1,10 +1,18 @@
 const mongoose = require("mongoose");
+const fs = require("fs");
 
 let courseSchema = new mongoose.Schema({
     title: {
         type: String,
-        required: [true, "title is required field"],
-        uniqe: true
+        required: [true, "title is required filed"],
+        unique: true,
+        trim: true,
+        validate: {
+            validator: function (value) {
+                return value.length >= 3;
+            },
+            message: "title must be larger than 3 characters"
+        }
     },
     price: {
         type: Number,
@@ -26,6 +34,12 @@ let courseSchema = new mongoose.Schema({
 courseSchema.virtual("priceInDollar").get(function () {
     return this.price / 3.5;
 });
+
+courseSchema.post("save", function (doc, next) {
+    let content = `New course with title ${doc.title} added by Ziad. \n`;
+    fs.appendFileSync("./log/log.txt", content);
+    next();
+})
 
 courseSchema.pre(/^find/, function (next) {
     this.find({ releaseYear: { $lte: new Date().getFullYear() } });
