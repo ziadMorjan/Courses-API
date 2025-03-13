@@ -15,6 +15,4 @@ router.route("/:id")
     .patch(courseController.updateCourse)
     .delete(courseController.deleteCourse);
 
-module.exports = {
-    router
-};
+module.exports = router;
