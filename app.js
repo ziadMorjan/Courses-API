@@ -2,7 +2,7 @@ const express = require("express");
 const morgan = require("morgan");
 const CoursesRoutes = require("./routes/CoursesRoutes");
 const UserRouts = require("./routes/UserRouts");
-const AuthRouts = require("./routes/UserRouts");
+const AuthRouts = require("./routes/AuthRouts");
 const DefaultRoute = require("./routes/DefaultRoute");
 const { globalErrorHandler } = require("./controllers/ErrorController");
 
@@ -18,6 +18,6 @@ app.use("/api/v1/users", UserRouts);
 app.use("/api/v1/auth", AuthRouts);
 app.use(DefaultRoute);
 
-app.use(globalErrorHandler)
+app.use(globalErrorHandler);
 
 module.exports = app;
