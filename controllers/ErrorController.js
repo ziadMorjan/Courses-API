@@ -9,6 +9,8 @@ function globalErrorHandler(error, req, res, next) {
         if (error.name == "CastError") error = CastErrorHandler(error);
         if (error.code == 11000) error = DuplicateKeyHandler(error);
         if (error.name == "ValidationError") error = ValidationErrorHandler(error);
+        if (error.name == "JsonWebTokenError") error = JsonWebTokenErrorHandler();
+        if (error.name == "TokenExpiredError") error = TokenExpiredErrorHandler();
         prodError(res, error);
     }
 }
@@ -56,6 +58,14 @@ function ValidationErrorHandler(error) {
     let errors = Object.values(error.errors).map(value => value.message).join(". ");
     let message = `Validation Error: ${errors}`
     return new CustomError(message, 400);
+}
+
+function JsonWebTokenErrorHandler() {
+    return new CustomError("Invalid token, please login!", 401);
+}
+
+function TokenExpiredErrorHandler() {
+    return new CustomError("Expired token, please login again!", 401);
 }
 
 module.exports = {
