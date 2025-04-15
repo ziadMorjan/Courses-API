@@ -1,0 +1,17 @@
+[
+    {
+        "firstName": "admin",
+        "lastName": "1",
+        "email": "admin@gmail.com",
+        "password": "123456789",
+        "confirmPassword": "123456789",
+        "role": "admin"
+    },
+    {
+        "firstName": "user",
+        "lastName": "1",
+        "email": "user@gmail.com",
+        "password": "123456789",
+        "confirmPassword": "123456789"
+    }
+]

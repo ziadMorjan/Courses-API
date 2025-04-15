@@ -48,7 +48,13 @@ let userSchema = new mongoose.Schema({
         enum: ["admin", "user"],
         default: "user"
     },
+    Active: {
+        type: Boolean,
+        default: true
+    },
     passwordUpdatedAt: Date,
+    resetToken: String,
+    resetTokenExpiredAt: Date,
     createdAt: {
         type: Date,
         default: Date.now()

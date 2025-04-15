@@ -3,6 +3,8 @@ const { createToken } = require("../utils/JWTs");
 const User = require("./../models/User");
 const { asyncErrorHandler } = require("./ErrorController");
 const bcryptjs = require("bcryptjs");
+const crypto = require("crypto");
+const emails = require("./../utils/emails");
 
 let signup = asyncErrorHandler(async function (req, res) {
     let newUser = await User.create(req.body);
@@ -36,7 +38,73 @@ let login = asyncErrorHandler(async function (req, res) {
     });
 });
 
+let forgetPassword = asyncErrorHandler(async function (req, res) {
+    let user = await User.findOne({ email: req.body.email });
+    if (!user)
+        throw new CustomError("There is no user with the provided email!", 404);
+
+    let resetToken = crypto.randomBytes(32).toString("hex");
+    user.resetToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+    user.resetTokenExpiredAt = Date.now() + 10 * 60 * 1000;
+    user.save({ validateBeforeSave: false });
+
+    let resetUrl = `${req.protocol}://${req.get("host")}/api/v1/auth/resetPassword/${resetToken}`;
+    let message = `We receive your request to reset your password, use this link to reset your password\n\n${resetUrl}\n\nThe reset url is valid for 10 minutes`;
+    console.log(message);
+
+    try {
+        await emails.sendResetPasswordEmail({
+            from: "Courses API",
+            to: user.email,
+            subject: "Resting Password",
+            message
+        });
+
+        res.status(200).json({
+            status: "success",
+            message: "Reset link sent to your email"
+        });
+
+    } catch (error) {
+        user.resetToken = undefined;
+        user.resetTokenExpiredAt = undefined;
+        user.save({ validateBeforeSave: false });
+
+        throw new CustomError("Some thing was wrong with sending email, pleas try again later", 500);
+    }
+
+});
+
+let resetPassword = asyncErrorHandler(async function (req, res) {
+    let hashedResetPassword = crypto.createHash("sha256").update(req.params.resetToken).digest("hex");
+    let user = await User.findOne({
+        resetToken: hashedResetPassword,
+        resetTokenExpiredAt: {
+            $gte: Date.now()
+        }
+    });
+
+    if (!user)
+        throw new CustomError("Invalid or Expired Token!", 400);
+
+    user.password = req.body.password;
+    user.confirmPassword = req.body.confirmPassword;
+    user.resetToken = undefined;
+    user.resetTokenExpiredAt = undefined;
+    user.passwordUpdatedAt = Date.now();
+    await user.save();
+
+    let token = createToken(user.id);
+
+    res.status(200).json({
+        status: "success",
+        token
+    });
+});
+
 module.exports = {
     signup,
-    login
+    login,
+    forgetPassword,
+    resetPassword
 }
