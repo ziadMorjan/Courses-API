@@ -9,6 +9,9 @@ const emails = require("./../utils/emails");
 let signup = asyncErrorHandler(async function (req, res) {
     let newUser = await User.create(req.body);
 
+    if (req.body.role && req.body.role == "admin")
+        throw new CustomError("You can not signup as an admin!", 403);
+
     let token = createToken(newUser.id);
 
     res.status(201).json({

@@ -48,7 +48,7 @@ let userSchema = new mongoose.Schema({
         enum: ["admin", "user"],
         default: "user"
     },
-    Active: {
+    active: {
         type: Boolean,
         default: true
     },
@@ -68,6 +68,10 @@ userSchema.pre("save", function (next) {
     this.password = bcrypt.hashSync(this.password, 10);
     this.confirmPassword = undefined;
 
+    next();
+});
+userSchema.pre(/^find/, function (next) {
+    this.find({ active: { $ne: false } });
     next();
 });
 

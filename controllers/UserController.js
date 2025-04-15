@@ -102,9 +102,43 @@ let changePassword = asyncErrorHandler(async function (req, res) {
 
 });
 
-let updateMe = asyncErrorHandler();
+let removeNotAllowedProps = function (reqBody, ...allowed) {
+    Object.keys(reqBody).map((prop) => {
+        if (!allowed.includes(prop))
+            delete reqBody[prop];
+    });
+}
 
-let deleteMe = asyncErrorHandler();
+let updateMe = asyncErrorHandler(async function (req, res) {
+    if (req.body.role)
+        throw new CustomError("You can not change your role!", 403);
+
+    if (req.body.password || req.body.confirmPassword)
+        throw new CustomError("You can not change your password from here!", 403);
+
+    removeNotAllowedProps(req.body, "firstName", "lastName", "email", "photo");
+
+    let user = await User.findByIdAndUpdate(req.user.id, req.body, {
+        runValidators: true,
+        new: true
+    });
+
+    res.status(200).json({
+        status: "success",
+        data: {
+            user
+        }
+    });
+});
+
+let deleteMe = asyncErrorHandler(async function (req, res) {
+    await User.findByIdAndUpdate(req.user.id, { active: false });
+
+    res.status(204).json({
+        status: "success",
+        data: null
+    });
+});
 
 module.exports = {
     getAllUsers,
