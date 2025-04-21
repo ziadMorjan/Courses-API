@@ -29,7 +29,7 @@ let getUser = asyncErrorHandler(async function (req, res) {
     let user = await User.findById(req.params.id);
 
     if (!user)
-        throw new CustomError(`There is no user found with id '${req.params.id}'!`);
+        throw new CustomError(`There is no user found with id '${req.params.id}'!`, 404);
 
     res.status(200).json({
         status: "success",
@@ -58,7 +58,7 @@ let updateUser = asyncErrorHandler(async function (req, res) {
     });
 
     if (!updatedUser)
-        throw new CustomError(`There is no user found with id '${req.params.id}'!`);
+        throw new CustomError(`There is no user found with id '${req.params.id}'!`, 404);
 
     res.status(200).json({
         status: "success",
@@ -72,7 +72,7 @@ let deleteUser = asyncErrorHandler(async function (req, res) {
     let deletedUser = await User.findByIdAndDelete(req.params.id);
 
     if (!deletedUser)
-        throw new CustomError(`There is no user found with id '${req.params.id}'!`);
+        throw new CustomError(`There is no user found with id '${req.params.id}'!`, 404);
 
     res.status(204).json({
         status: "success",

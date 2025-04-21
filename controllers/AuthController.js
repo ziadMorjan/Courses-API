@@ -6,20 +6,31 @@ const bcryptjs = require("bcryptjs");
 const crypto = require("crypto");
 const emails = require("./../utils/emails");
 
+let sendResWithToken = function (res, statusCode, id) {
+
+    let token = createToken(id);
+
+    res.cookie("token", token, {
+        maxAge: process.env.LOGIN_EXPIRE,
+        httpOnly: true,
+        secure: process.env.NODE_ENV == "production" ? true : false
+    });
+
+    res.status(statusCode).json({
+        status: "success",
+        data: {
+            token
+        }
+    });
+}
+
 let signup = asyncErrorHandler(async function (req, res) {
     let newUser = await User.create(req.body);
 
     if (req.body.role && req.body.role == "admin")
         throw new CustomError("You can not signup as an admin!", 403);
 
-    let token = createToken(newUser.id);
-
-    res.status(201).json({
-        status: "success",
-        data: {
-            token
-        }
-    });
+    sendResWithToken(res, 201, newUser.id);
 });
 
 let login = asyncErrorHandler(async function (req, res) {
@@ -33,12 +44,7 @@ let login = asyncErrorHandler(async function (req, res) {
     if (!user || !bcryptjs.compareSync(password, user.password))
         throw new CustomError("Wrong email or password!", 400);
 
-    let token = createToken(user.id);
-
-    res.status(200).json({
-        status: "success",
-        token
-    });
+    sendResWithToken(res, 200, user.id);
 });
 
 let forgetPassword = asyncErrorHandler(async function (req, res) {
@@ -97,12 +103,7 @@ let resetPassword = asyncErrorHandler(async function (req, res) {
     user.passwordUpdatedAt = Date.now();
     await user.save();
 
-    let token = createToken(user.id);
-
-    res.status(200).json({
-        status: "success",
-        token
-    });
+    sendResWithToken(res, 200, user.id);
 });
 
 module.exports = {
